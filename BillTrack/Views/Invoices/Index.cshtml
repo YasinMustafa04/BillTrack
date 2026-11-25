@@ -1,0 +1,128 @@
+﻿@model InvoiceIndexViewModel
+@{
+    ViewData["Title"] = "Invoices";
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var dateFrom = Model.DateFrom?.ToString("yyyy-MM-dd");
+    var dateTo = Model.DateTo?.ToString("yyyy-MM-dd");
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Invoices</h1>
+        <p class="page-subtitle">Track invoices and payment statuses</p>
+    </div>
+    <a asp-action="Create" class="btn btn-accent">+ New Invoice</a>
+</div>
+
+<div class="panel">
+    <div class="panel-header">
+        <h2 class="panel-title">Invoices List <span class="text-muted fs-6">(@Model.TotalItems)</span></h2>
+    </div>
+
+    <form asp-action="Index" method="get" class="filter-bar">
+        <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search by invoice number or client" />
+
+        <select name="status" class="form-select">
+            <option value="">All statuses</option>
+            <option value="Pending" selected="@(Model.Status == InvoiceStatus.Pending)">Pending</option>
+            <option value="Paid" selected="@(Model.Status == InvoiceStatus.Paid)">Paid</option>
+            <option value="Overdue" selected="@(Model.Status == InvoiceStatus.Overdue)">Overdue</option>
+        </select>
+
+        <input type="date" name="dateFrom" value="@dateFrom" class="form-control" title="Issued from" />
+        <input type="date" name="dateTo" value="@dateTo" class="form-control" title="Issued to" />
+
+        <select name="sort" class="form-select">
+            <option value="date_desc" selected="@(Model.Sort == "date_desc")">Newest first</option>
+            <option value="date_asc" selected="@(Model.Sort == "date_asc")">Oldest first</option>
+            <option value="due_asc" selected="@(Model.Sort == "due_asc")">Due date (soonest)</option>
+        </select>
+
+        <button type="submit" class="btn btn-accent">Filter</button>
+        @if (Model.HasFilters)
+        {
+            <a asp-action="Index" class="btn btn-soft">Clear</a>
+        }
+    </form>
+
+    @if (Model.Invoices.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Client</th>
+                        <th>Issue Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var invoice in Model.Invoices)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@invoice.InvoiceNumber</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="avatar-circle">@invoice.Client?.FullName.FirstOrDefault()</span>
+                                    <span>@invoice.Client?.FullName</span>
+                                </div>
+                            </td>
+                            <td>@invoice.IssueDate.ToDisplayDate()</td>
+                            <td class="@(invoice.EffectiveStatus == InvoiceStatus.Overdue ? "text-overdue" : "")">@invoice.DueDate.ToDisplayDate()</td>
+                            <td><partial name="_StatusBadge" model="invoice.EffectiveStatus" /></td>
+                            <td class="text-end fw-semibold">@invoice.Amount.ToMoney()</td>
+                            <td class="text-end text-nowrap">
+                                <a asp-action="Details" asp-route-id="@invoice.Id" class="btn-sm-soft">View</a>
+                                <a asp-action="Edit" asp-route-id="@invoice.Id" class="btn-sm-soft">Edit</a>
+                                @if (invoice.Status != InvoiceStatus.Paid)
+                                {
+                                    <form asp-action="MarkAsPaid" asp-route-id="@invoice.Id" method="post" class="inline-form">
+                                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                        <button type="submit" class="btn-sm-soft btn-sm-success">Mark paid</button>
+                                    </form>
+                                }
+                                <a asp-action="Delete" asp-route-id="@invoice.Id" class="btn-sm-soft btn-sm-danger">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-bar">
+            <span>Page @Model.Page of @Model.TotalPages</span>
+            <div class="d-flex gap-2">
+                @if (Model.Page > 1)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@(Model.Page - 1)"
+                       asp-route-search="@Model.Search"
+                       asp-route-status="@Model.Status"
+                       asp-route-dateFrom="@dateFrom"
+                       asp-route-dateTo="@dateTo"
+                       asp-route-sort="@Model.Sort"
+                       class="btn btn-soft">Previous</a>
+                }
+                @if (Model.Page < Model.TotalPages)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@(Model.Page + 1)"
+                       asp-route-search="@Model.Search"
+                       asp-route-status="@Model.Status"
+                       asp-route-dateFrom="@dateFrom"
+                       asp-route-dateTo="@dateTo"
+                       asp-route-sort="@Model.Sort"
+                       class="btn btn-soft">Next</a>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">No invoices found.</div>
+    }
+</div>

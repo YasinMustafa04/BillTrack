@@ -1,0 +1,10 @@
+﻿@model InvoiceStatus
+@{
+    var css = Model switch
+    {
+        InvoiceStatus.Paid => "status-paid",
+        InvoiceStatus.Overdue => "status-overdue",
+        _ => "status-pending"
+    };
+}
+<span class="status-badge @css">@Model</span>

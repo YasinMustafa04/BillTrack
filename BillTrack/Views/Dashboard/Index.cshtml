@@ -1,0 +1,97 @@
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Overview of your invoices and payments</p>
+    </div>
+    <a asp-controller="Invoices" asp-action="Create" class="btn btn-accent">+ New Invoice</a>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-xl-5 g-3 mb-4">
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-label">Total Invoices</div>
+            <div class="stat-value">@Model.TotalInvoices</div>
+            <div class="stat-sub">All issued invoices</div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value">@Model.TotalRevenue.ToMoney()</div>
+            <div class="stat-sub">Sum of all invoices</div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-label">Paid Amount</div>
+            <div class="stat-value">@Model.PaidAmount.ToMoney()</div>
+            <div class="stat-sub"><span class="dot dot-green"></span>@Model.PaidCount paid invoices</div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-label">Pending Amount</div>
+            <div class="stat-value">@Model.PendingAmount.ToMoney()</div>
+            <div class="stat-sub"><span class="dot dot-orange"></span>@Model.PendingCount awaiting payment</div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-label">Overdue Invoices</div>
+            <div class="stat-value">@Model.OverdueCount</div>
+            <div class="stat-sub"><span class="dot dot-red"></span>@Model.OverdueAmount.ToMoney() overdue</div>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-header">
+        <h2 class="panel-title">Recent Invoices</h2>
+        <a asp-controller="Invoices" asp-action="Index" class="btn btn-soft">View all</a>
+    </div>
+
+    @if (Model.RecentInvoices.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Client</th>
+                        <th>Due Date</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var invoice in Model.RecentInvoices)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@invoice.InvoiceNumber</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="avatar-circle">@invoice.Client?.FullName.FirstOrDefault()</span>
+                                    <span>@invoice.Client?.FullName</span>
+                                </div>
+                            </td>
+                            <td class="@(invoice.EffectiveStatus == InvoiceStatus.Overdue ? "text-overdue" : "")">@invoice.DueDate.ToDisplayDate()</td>
+                            <td>@invoice.Client?.Email</td>
+                            <td><partial name="_StatusBadge" model="invoice.EffectiveStatus" /></td>
+                            <td class="text-end fw-semibold">@invoice.Amount.ToMoney()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">No invoices yet.</div>
+    }
+</div>

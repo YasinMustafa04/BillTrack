@@ -1,0 +1,26 @@
+﻿@model Client
+@{
+    ViewData["Title"] = "Add Client";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Add Client</h1>
+        <p class="page-subtitle">Create a new client</p>
+    </div>
+</div>
+
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        <partial name="_ClientForm" model="Model" />
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-accent">Save Client</button>
+            <a asp-action="Index" class="btn btn-soft">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

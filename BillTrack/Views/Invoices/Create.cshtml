@@ -1,0 +1,26 @@
+﻿@model InvoiceFormViewModel
+@{
+    ViewData["Title"] = "New Invoice";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">New Invoice</h1>
+        <p class="page-subtitle">New invoices are created with status Pending</p>
+    </div>
+</div>
+
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        <partial name="_InvoiceForm" model="Model" />
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-accent">Save Invoice</button>
+            <a asp-action="Index" class="btn btn-soft">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

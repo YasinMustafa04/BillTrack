@@ -1,0 +1,62 @@
+﻿@model Invoice
+@{
+    ViewData["Title"] = Model.InvoiceNumber;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">@Model.InvoiceNumber</h1>
+        <p class="page-subtitle">Invoice details</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        @if (Model.Status != InvoiceStatus.Paid)
+        {
+            <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post">
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <button type="submit" class="btn btn-accent">Mark as Paid</button>
+            </form>
+        }
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-soft">Edit</a>
+        <a asp-action="Index" class="btn btn-soft">Back to list</a>
+    </div>
+</div>
+
+<div class="panel p-4">
+    <div class="row detail-list">
+        <div class="col-md-6">
+            <div class="detail-label">Client</div>
+            <div class="detail-value">
+                <a asp-controller="Clients" asp-action="Details" asp-route-id="@Model.ClientId">@Model.Client?.FullName</a>
+                @if (!string.IsNullOrEmpty(Model.Client?.CompanyName))
+                {
+                    <span class="text-muted">(@Model.Client.CompanyName)</span>
+                }
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="detail-label">Status</div>
+            <div class="detail-value"><partial name="_StatusBadge" model="Model.EffectiveStatus" /></div>
+        </div>
+        <div class="col-12">
+            <div class="detail-label">Description</div>
+            <div class="detail-value">@Model.Description</div>
+        </div>
+        <div class="col-md-4">
+            <div class="detail-label">Issue Date</div>
+            <div class="detail-value">@Model.IssueDate.ToDisplayDate()</div>
+        </div>
+        <div class="col-md-4">
+            <div class="detail-label">Due Date</div>
+            <div class="detail-value @(Model.EffectiveStatus == InvoiceStatus.Overdue ? "text-overdue" : "")">@Model.DueDate.ToDisplayDate()</div>
+        </div>
+        <div class="col-md-4">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value">@Model.Amount.ToMoney()</div>
+        </div>
+        <div class="col-md-4">
+            <div class="detail-label">Created</div>
+            <div class="detail-value mb-0">@Model.CreatedAt.ToDisplayDate()</div>
+        </div>
+    </div>
+</div>

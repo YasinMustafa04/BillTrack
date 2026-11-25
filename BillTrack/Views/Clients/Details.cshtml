@@ -1,0 +1,92 @@
+﻿@model Client
+@{
+    ViewData["Title"] = Model.FullName;
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">@Model.FullName</h1>
+        <p class="page-subtitle">Client details and invoice history</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-accent">Edit</a>
+        <a asp-action="Index" class="btn btn-soft">Back to list</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="panel p-4 h-100">
+            <div class="row detail-list">
+                <div class="col-md-6">
+                    <div class="detail-label">Full Name</div>
+                    <div class="detail-value">@Model.FullName</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-label">Company</div>
+                    <div class="detail-value">@(Model.CompanyName ?? "-")</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">@Model.Email</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-label">Phone</div>
+                    <div class="detail-value">@(Model.Phone ?? "-")</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-label">Client since</div>
+                    <div class="detail-value mb-0">@Model.CreatedAt.ToDisplayDate()</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="stat-card">
+            <div class="stat-label">Total Invoiced</div>
+            <div class="stat-value">@Model.Invoices.Sum(i => i.Amount).ToMoney()</div>
+            <div class="stat-sub">@Model.Invoices.Count invoice(s)</div>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-header">
+        <h2 class="panel-title">Invoices</h2>
+    </div>
+
+    @if (Model.Invoices.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Description</th>
+                        <th>Issue Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var invoice in Model.Invoices.OrderByDescending(i => i.IssueDate))
+                    {
+                        <tr>
+                            <td class="fw-semibold">@invoice.InvoiceNumber</td>
+                            <td>@invoice.Description</td>
+                            <td>@invoice.IssueDate.ToDisplayDate()</td>
+                            <td class="@(invoice.EffectiveStatus == InvoiceStatus.Overdue ? "text-overdue" : "")">@invoice.DueDate.ToDisplayDate()</td>
+                            <td><partial name="_StatusBadge" model="invoice.EffectiveStatus" /></td>
+                            <td class="text-end fw-semibold">@invoice.Amount.ToMoney()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">This client has no invoices yet.</div>
+    }
+</div>

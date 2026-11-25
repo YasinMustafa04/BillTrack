@@ -1,0 +1,71 @@
+﻿@model ClientIndexViewModel
+@{
+    ViewData["Title"] = "Clients";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Clients</h1>
+        <p class="page-subtitle">Manage your clients and their contact details</p>
+    </div>
+    <a asp-action="Create" class="btn btn-accent">+ Add Client</a>
+</div>
+
+<div class="panel">
+    <div class="panel-header">
+        <h2 class="panel-title">All Clients <span class="text-muted fs-6">(@Model.Clients.Count)</span></h2>
+
+        <form asp-action="Index" method="get" class="search-box">
+            <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search by name, email or company" />
+            <button type="submit" class="btn btn-soft">Search</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Search))
+            {
+                <a asp-action="Index" class="btn btn-soft">Clear</a>
+            }
+        </form>
+    </div>
+
+    @if (Model.Clients.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Company</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th class="text-center">Invoices</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var client in Model.Clients)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="avatar-circle">@client.FullName.FirstOrDefault()</span>
+                                    <span class="fw-semibold">@client.FullName</span>
+                                </div>
+                            </td>
+                            <td>@(client.CompanyName ?? "-")</td>
+                            <td>@client.Email</td>
+                            <td>@(client.Phone ?? "-")</td>
+                            <td class="text-center">@client.InvoiceCount</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@client.Id" class="btn-sm-soft">View</a>
+                                <a asp-action="Edit" asp-route-id="@client.Id" class="btn-sm-soft">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@client.Id" class="btn-sm-soft btn-sm-danger">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">No clients found.</div>
+    }
+</div>
