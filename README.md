@@ -17,7 +17,7 @@ BillTrack lets small businesses, freelancers and entrepreneurs manage their clie
 |---|---|
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Clients](docs/screenshots/clients.png) |
 
-| Invoices (filtered by Overdue) | Form validation |
+| Invoices  | Form validation |
 |---|---|
 | ![Invoices](docs/screenshots/invoices.png) | ![Invoice form](docs/screenshots/invoice-form.png) |
 
